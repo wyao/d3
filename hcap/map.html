@@ -4,36 +4,9 @@
   <!--Code borrowed from http://mbostock.github.com/d3/talk/20111018/azimuthal.html
       http://marcneuwirth.com/blog/2012/06/24/creating-the-earth-with-d3-js/-->
   <head>
-    <meta http-equiv="Content-Type" content="text/html;charset=utf-8"/>
+    <link rel="stylesheet" type="text/css" href="js/map.css" />
     <script type="text/javascript" src="../d3.v2.js"></script>
     <script type="text/javascript" src="js/d3.geo.js"></script>
-    <style type="text/css">
-
-svg {
-  width: 900px;
-  height: 800px;
-  pointer-events: all;
-}
-
-circle {
-  fill: #dbe4f0;
-}
-
-path {
-  fill: #aaa;
-  stroke: #fff;
-}
-
-path#Japan, #India, #SouthKorea, #Thailand, #Turkey, #UnitedArabEmirates, #UnitedStatesofAmerica {
-  fill: #903;
-}
-
-#map svg {
-  display: block;
-  margin: auto;
-}
-
-    </style>
   </head>
   <body>
     <div id="map">
