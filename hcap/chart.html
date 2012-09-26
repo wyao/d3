@@ -7,6 +7,7 @@
       // Load Google Chart APIs
       google.load('visualization', '1', {packages:['corechart']});
       google.load('visualization', '1', {packages: ['geochart']});
+      google.load('visualization', '1', {packages:['table']});
 
       // Set up
       var years = ['2003-04', '2004-05', '2005-06', '2006-07', '2007-08', 
@@ -33,22 +34,29 @@
         schoolAmounts[schoolMap[key]] = 0;
       }
 
+      var surveyData = [];
+
       // Retrieve Google Form Data
       $.getJSON("https://spreadsheets.google.com/feeds/cells/0AianULedsJ4SdGdvYmNEYmpsN1RDRFk4dTdCbGpjSUE/1/public/basic?alt=json",
         function(x) {
+          var entry = x.feed.entry
           // Load relevant data
           for (i=10; i<x.feed.openSearch$totalResults.$t; i+=5) {
+            var amount = entry[i].content.$t.replace(/[^0-9\.]+/g,"");
             // Aggregate by year
-            yearlyAmounts[x.feed.entry[i-1].content.$t] += 
-              Number(x.feed.entry[i].content.$t.replace(/[^0-9\.]+/g,""));
+            yearlyAmounts[entry[i-1].content.$t] +=
+              Number(amount);
             // Aggregate by school
-            schoolAmounts[schoolMap[x.feed.entry[i-2].content.$t]] += 
-              Number(x.feed.entry[i].content.$t.replace(/[^0-9\.]+/g,""));
+            schoolAmounts[schoolMap[entry[i-2].content.$t]] +=
+              Number(amount);
+            // Aggregate all data for table
+            surveyData.push([entry[i-3].content.$t, entry[i-2].content.$t,
+              entry[i-1].content.$t, {v:parseFloat(amount), f:'$'+amount}]);
           }
-
           // Draw
           google.setOnLoadCallback(drawChart);
           google.setOnLoadCallback(drawRegionsMap);
+          google.setOnLoadCallback(drawTable);
       });
 
       // Draw bar graph (by year)
@@ -69,7 +77,6 @@
         chart.draw(data, options);
       }
 
-
       // Draw map (by country)
       function drawRegionsMap() {
         var mapData = [['School', 'Donation']];
@@ -83,12 +90,26 @@
 
         var chart = new google.visualization.GeoChart(document.getElementById('map_div'));
         chart.draw(data, options);
-    };
+      };
+
+      // Draw table
+      function drawTable() {
+        var data = new google.visualization.DataTable();
+        data.addColumn('string', 'Name');
+        data.addColumn('string', 'School');
+        data.addColumn('string', 'HCAP Year');
+        data.addColumn('number', 'Donation');
+        data.addRows(surveyData);
+
+        var table = new google.visualization.Table(document.getElementById('table_div'));
+        table.draw(data, {showRowNumber:true, sortColumn:3, sortAscending:false});
+      }
 
     </script>
   </head>
   <body>
-    <div id="chart_div" style="width: 500px; height: 500px;"></div>
+    <div id="table_div" style="width:600px;"></div>
+    <div id="chart_div" style="width: 900px; height: 500px;"></div>
     <div id="map_div" style="width: 900px; height: 500px;"></div>
   </body>
 </html>
